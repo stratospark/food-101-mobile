@@ -8,10 +8,12 @@ display(Image('./mobile.jpg'))
 ```
 
 
-![jpeg](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_1_0.jpeg)
+![jpeg](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_1_0.jpg)
 
 
 ## Introduction
+
+** CODE AVAILABLE @ https://github.com/stratospark/food-101-mobile **
 
 In a previous project, I showed how to train a Convolutional Neural Network to [classify food images using Keras/Tensorflow](http://blog.stratospark.com/deep-learning-applied-food-classification-deep-learning-keras.html). We also saw how to export the model to [Keras.js](https://github.com/transcranial/keras-js) for use in a HTML5/Javascript browser application.
 
@@ -184,7 +186,7 @@ plt.imshow(img)
 
 
 
-![png](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_23_1.png)
+![png](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_24_1.png)
 
 
 
@@ -210,7 +212,7 @@ plt.imshow(img_processed)
 
 
 
-![png](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_25_1.png)
+![png](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_26_1.png)
 
 
 
