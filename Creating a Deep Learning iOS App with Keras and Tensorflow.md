@@ -1,13 +1,23 @@
 
 # Creating a Deep Learning iOS App with Keras and Tensorflow
 
+
+```python
+from IPython.display import display, Image
+display(Image('./mobile.jpg'))
+```
+
+
+![jpeg](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_1_0.jpeg)
+
+
 ## Introduction
 
 In a previous project, I showed how to train a Convolutional Neural Network to [classify food images using Keras/Tensorflow](http://blog.stratospark.com/deep-learning-applied-food-classification-deep-learning-keras.html). We also saw how to export the model to [Keras.js](https://github.com/transcranial/keras-js) for use in a HTML5/Javascript browser application.
 
 For this next writeup, I'll show how to take the same model and prepare it for use in a mobile app. I only have experience with iOS devices and only have an iPhone for testing, but the process of extracting, modifying, and serializing the computation graphs should apply for Android deployments as well.
 
-Here is a video capture of the app running on my development device, an iPhone 5s. I would hope it can run much faster on newer devices!!
+Here is a video capture of the app running on my development device, an iPhone 5s. BTW, all food in the screenshots and video are *vegan*! ;)
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/nYprPrCTwrA" frameborder="0" allowfullscreen></iframe>
 
@@ -174,7 +184,7 @@ plt.imshow(img)
 
 
 
-![png](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_22_1.png)
+![png](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_23_1.png)
 
 
 
@@ -200,7 +210,7 @@ plt.imshow(img_processed)
 
 
 
-![png](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_24_1.png)
+![png](Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_files/Creating%20a%20Deep%20Learning%20iOS%20App%20with%20Keras%20and%20Tensorflow_25_1.png)
 
 
 
@@ -790,21 +800,25 @@ First you need to:
 * Do a local build of Tensorflow: https://www.tensorflow.org/install/install_sources, making sure you install Bazel correctly and have executed ./configure
 * Build the following tools from within your tensorflow folder:
 
-`bazel build tensorflow/tools/graph_transforms:transform_graph
+```
+bazel build tensorflow/tools/graph_transforms:transform_graph
 bazel build tensorflow/tools/graph_transforms:summarize_graph
-bazel build tensorflow/contrib/util:convert_graphdef_memmapped_format`
+bazel build tensorflow/contrib/util:convert_graphdef_memmapped_format
+```
 
 Now, let's try the `summarize_graph` utility on the .pb file that we have just exported:
 
-`(tensorflow) ➜  model_export git:(master) ✗ ../../tensorflow/bazel-bin/tensorflow/tools/graph_transforms/summarize_graph --in_graph=graph.pb`
+```
+(tensorflow) ➜  model_export git:(master) ✗ ../../tensorflow/bazel-bin/tensorflow/tools/graph_transforms/summarize_graph --in_graph=graph.pb
 
-`Found 1 possible inputs: (name=input_1, type=float(1), shape=[])
+Found 1 possible inputs: (name=input_1, type=float(1), shape=[])
 No variables spotted.
 Found 1 possible outputs: (name=Softmax, op=Softmax)
 Found 21820820 (21.82M) const parameters, 0 (0) variable parameters, and 190 control_edges
 Op types used: 1435 Const, 758 Identity, 754 Mul, 565 Add, 376 Sub, 189 Reshape, 188 Rsqrt, 188 Sum, 95 Shape, 95 Prod, 95 Merge, 94 Mean, 94 Gather, 94 StopGradient, 94 SquaredDifference, 94 Conv2D, 94 Square, 94 Reciprocal, 94 Relu, 94 Cast, 15 ConcatV2, 11 AvgPool, 3 MaxPool, 1 Softmax, 1 RealDiv, 1 Placeholder, 1 Pack, 1 StridedSlice, 1 MatMul
 To use with tensorflow/tools/benchmark:benchmark_model try these arguments:
-bazel run tensorflow/tools/benchmark:benchmark_model -- --graph=graph.pb --show_flops --logtostderr --input_layer=input_1 --input_layer_type=float --input_layer_shape= --output_layer=Softmax`
+bazel run tensorflow/tools/benchmark:benchmark_model -- --graph=graph.pb --show_flops --logtostderr --input_layer=input_1 --input_layer_type=float --input_layer_shape= --output_layer=Softmax
+```
 
 
 ```python
@@ -816,14 +830,15 @@ bazel run tensorflow/tools/benchmark:benchmark_model -- --graph=graph.pb --show_
 
 Then we can optimize the graph for deployment. Notice that we are rounding the weights so that the file can compress better when added to the device bundle.
 
-`(tensorflow) ➜  model_export git:(master) ✗ ../../tensorflow/bazel-bin/tensorflow/tools/graph_transforms/transform_graph \
+```
+(tensorflow) ➜  model_export git:(master) ✗ ../../tensorflow/bazel-bin/tensorflow/tools/graph_transforms/transform_graph \
 --in_graph=graph.pb \
 --out_graph=opt_graph.pb \
 --inputs='input_1' \
 --outputs='Softmax' \
---transforms='strip_unused_nodes(type=float, shape="1,299,299,3") remove_nodes(op=Identity, op=CheckNumerics) round_weights(num_steps=256) fold_constants(ignore_errors=true) fold_batch_norms fold_old_batch_norms'`
+--transforms='strip_unused_nodes(type=float, shape="1,299,299,3") remove_nodes(op=Identity, op=CheckNumerics) round_weights(num_steps=256) fold_constants(ignore_errors=true) fold_batch_norms fold_old_batch_norms'
 
-`2017-03-22 00:35:27.886563: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying strip_unused_nodes
+2017-03-22 00:35:27.886563: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying strip_unused_nodes
 2017-03-22 00:35:28.048049: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying remove_nodes
 2017-03-22 00:35:28.709523: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying round_weights
 2017-03-22 00:35:29.032210: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying fold_constants
@@ -833,7 +848,8 @@ Then we can optimize the graph for deployment. Notice that we are rounding the w
 2017-03-22 00:35:29.064917: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
 2017-03-22 00:35:29.064919: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
 2017-03-22 00:35:29.544610: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying fold_batch_norms
-2017-03-22 00:35:29.655708: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying fold_old_batch_norms`
+2017-03-22 00:35:29.655708: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying fold_old_batch_norms
+```
 
 
 
@@ -846,15 +862,17 @@ Then we can optimize the graph for deployment. Notice that we are rounding the w
 
 Next, we can shrink the graph down by quantizing the weights. ** Warning, this does not work on the iOS device! **
 
-`(tensorflow) ➜  model_export git:(master) ✗ ../../tensorflow/bazel-bin/tensorflow/tools/graph_transforms/transform_graph \
+```
+(tensorflow) ➜  model_export git:(master) ✗ ../../tensorflow/bazel-bin/tensorflow/tools/graph_transforms/transform_graph \
 --in_graph=opt_graph.pb \
 --out_graph=shrink_graph.pb \
 --inputs='input_1' \
 --outputs='Softmax' \
---transforms='quantize_weights strip_unused_nodes'`
+--transforms='quantize_weights strip_unused_nodes'
 
-`2017-03-22 00:39:51.366052: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying quantize_weights
-2017-03-22 00:39:51.913481: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying strip_unused_nodes`
+2017-03-22 00:39:51.366052: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying quantize_weights
+2017-03-22 00:39:51.913481: I tensorflow/tools/graph_transforms/transform_graph.cc:257] Applying strip_unused_nodes
+```
 
 
 ```python
@@ -866,9 +884,11 @@ Next, we can shrink the graph down by quantizing the weights. ** Warning, this d
 
 Finally, we can create a memory-mapped model, as described in [Tensorflow for Mobile Poets](https://petewarden.com/2016/09/27/tensorflow-for-mobile-poets/)
 
-`(tensorflow) ➜  model_export git:(master) ✗ ../../tensorflow/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format --in_graph=opt_graph.pb --out_graph=mem_graph.pb`
+```
+(tensorflow) ➜  model_export git:(master) ✗ ../../tensorflow/bazel-bin/tensorflow/contrib/util/convert_graphdef_memmapped_format --in_graph=opt_graph.pb --out_graph=mem_graph.pb
 
-`2017-03-22 00:40:32.066048: I tensorflow/contrib/util/convert_graphdef_memmapped_format_lib.cc:168] Converted 94 nodes`
+2017-03-22 00:40:32.066048: I tensorflow/contrib/util/convert_graphdef_memmapped_format_lib.cc:168] Converted 94 nodes
+```
 
 
 ```python
